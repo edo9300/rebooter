@@ -121,13 +121,16 @@ static void setNintendoAutoboot(uint64_t tid) {
 	*(volatile uint8_t*)(0x02000305) = 0x18;
 
 	// AutoLoad Old Title ID (former title) (can be 0=anonymous)
-	*(volatile uint64_t*)(0x02000308) = 0;
+	*(volatile uint64_t*)(0x02000308) = tid;
 
 	// AutoLoad New Title ID (new title to be started,0=none/launcher)
 	*(volatile uint64_t*)(0x02000310) = tid;
 
 	// AutoLoad Flags (bit0, 1-3, 4, 5,6,7) 
-	*(volatile uint32_t*)(0x02000318) = BIT(0) | BIT(1);
+	// BIT 0 "is valid"
+	// BIT 1 "cart boot"
+	// BIT 4 "skip logo" (mandatory on 3ds as it's not implemented there)
+	*(volatile uint32_t*)(0x02000318) = BIT(0) | BIT(1) | BIT(4);
 
 	// AutoLoad CRC16 of data at 2000308h (with initial value FFFFh)
 	*(volatile uint16_t*)(0x02000306) = swiCRC16(0xFFFF, (void*)0x02000308, 0x18);
