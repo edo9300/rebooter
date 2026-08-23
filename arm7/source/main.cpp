@@ -143,7 +143,7 @@ void fail() {
 int main() {
 	if((REG_SCFG_EXT & BIT(31)) == 0)
 		fail();
-	REG_SCFG_EXT |= SCFG_EXT_I2C | SCFG_EXT_SDMMC;
+	REG_SCFG_EXT |= SCFG_EXT_I2C | SCFG_EXT_SDMMC | SCFG_EXT_INTERRUPT | SCFG_EXT_AES;
 	if(!is3ds()) {
 		FATFS fs_info;
 		irqInit();
