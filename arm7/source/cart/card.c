@@ -148,8 +148,9 @@ static void mycardReadHeader(u32 *header)
     bool normalChip = (id & 0x80000000) != 0;        // ROM chip ID MSB, 1T-ROM
     while (REG_ROMCTRL & CARD_BUSY);
 
-    int numblocks = normalChip ? 8 : 1;
-    int log_blocksize = normalChip ? 1 : 3;
+    // read 0x400 bytes in total
+    int numblocks = normalChip ? 2 : 1;
+    int log_blocksize = normalChip ? 1 : 2;
 
     for(int i = 0; i < numblocks; ++i) {
         uint32_t flags = CARD_ACTIVATE | CARD_nRESET | CARD_CLK_SLOW
