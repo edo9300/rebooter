@@ -165,6 +165,8 @@ bool is3ds(void) {
 }
 
 void myi2cReboot(void) {
+	// "isTwl" bit, required for 3ds to reboot reliably
+	myi2cWritePM(I2CREGPM_MMCPWR, myi2cReadPM(I2CREGPM_MMCPWR) | BIT(0));
 	myi2cWritePM(I2CREGPM_RESETFLAG, 1);
 	myi2cWritePM(I2CREGPM_PWRCNT, 1);
 	swiDelay(20 * 0x20BA);
