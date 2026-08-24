@@ -31,6 +31,23 @@ auto constructLauncherPath(unsigned int launcher_tid) {
 	return out2 - 1;
 }
 
+bool isValidLauncher() {
+	FIL file;
+	f_open(&file, tmdPath, FA_READ);
+	UINT bytes_read = 0;
+	uint8_t buff[0x20];
+	f_read(&file, buff, 0x20, &bytes_read);
+	f_close(&file);
+
+	static constexpr std::array<uint8_t, 0xF> hna
+		{'L','A','U','N','C','H','E','R','\0','\0','\0','\0','H','N','A'};
+
+	if(bytes_read != 0x20 || !std::ranges::equal(hna, std::span{buff, buff+0xF})) {
+		return false;
+	}
+	return true;
+}
+
 void parseLauncherInfo(unsigned int launcher_tid) {
 	auto launcherPathEndIt = constructLauncherPath(launcher_tid);
 
@@ -58,24 +75,17 @@ void parseLauncherInfo(unsigned int launcher_tid) {
 			continue;
 
 		std::ranges::copy(filename, launcherPathEndIt);
-		FIL file;
-		f_open(&file, tmdPath, FA_READ);
-		UINT bytes_read = 0;
-		uint8_t buff[0x20];
-		f_read(&file, buff, 0x20, &bytes_read);
-		f_close(&file);
-
-		static constexpr std::array<uint8_t, 0xF> hna
-			{'L','A','U','N','C','H','E','R','\0','\0','\0','\0','H','N','A'};
-
-		if(bytes_read != 0x20 || !std::ranges::equal(hna, std::span{buff, buff+0xF})) {
-			*tmdPath = 0;
-			continue;
-		}
+		if(isValidLauncher())
+			return;
 	}
+	*tmdPath = 0;
 }
 
 void retrieveInstalledLauncherInfo() {
+	std::ranges::copy("nand:/launcher.dsi", tmdPath);
+	if(isValidLauncher())
+		return;
+	*tmdPath = 0;
 	// HNAA in case of failure, best we can do
 	uint32_t launcherTid = 0x484e4141;
 	{
